@@ -3,16 +3,27 @@ module.exports = {
     darkMode: ["class"],
     content: [
     "./src/**/*.{js,jsx,ts,tsx}",
-    "./public/index.html"
   ],
   theme: {
   	extend: {
-  		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
-  		},
   		colors: {
+  			stone: {
+  				50: '#FAFAF9',
+  				100: '#F5F5F4',
+  				200: '#E7E5E4',
+  				300: '#D6D3D1',
+  				400: '#A8A29E',
+  				500: '#78716C',
+  				600: '#57534E',
+  				700: '#44403C',
+  				800: '#292524',
+  				900: '#1C1917',
+  			},
+  			butcher: {
+  				red: '#DC2626',
+  				'red-dark': '#B91C1C',
+  				'red-light': '#FECACA',
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
@@ -54,29 +65,16 @@ module.exports = {
   				'5': 'hsl(var(--chart-5))'
   			}
   		},
-  		keyframes: {
-  			'accordion-down': {
-  				from: {
-  					height: '0'
-  				},
-  				to: {
-  					height: 'var(--radix-accordion-content-height)'
-  				}
-  			},
-  			'accordion-up': {
-  				from: {
-  					height: 'var(--radix-accordion-content-height)'
-  				},
-  				to: {
-  					height: '0'
-  				}
-  			}
+  		fontFamily: {
+  			display: ['Playfair Display', 'serif'],
+  			body: ['Manrope', 'sans-serif'],
   		},
-  		animation: {
-  			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  		borderRadius: {
+  			lg: 'var(--radius)',
+  			md: 'calc(var(--radius) - 2px)',
+  			sm: 'calc(var(--radius) - 4px)'
   		}
   	}
   },
   plugins: [require("tailwindcss-animate")],
-};
+}
