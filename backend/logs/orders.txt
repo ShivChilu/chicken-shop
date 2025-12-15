@@ -1,0 +1,12 @@
+
+================================================================================
+Order ID: bed746ed-d104-48c5-a53a-cdd51f73b383
+Date: 2025-12-15T09:04:24.270875+00:00
+Customer: hjgj
+Phone: 7986955634
+Address: 06, Tenepally, kummari gudem Gurrampode Nalgonda Telangana India, 508256, Pincode: 500001
+Items: Mutton Keema x 1, Mutton Keema x 1
+Total: ₹1400.0
+Payment: Cash on Delivery
+Status: pending
+================================================================================
