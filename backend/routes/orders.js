@@ -52,6 +52,119 @@ Order ID: ${order.id}`;
   }
 };
 
+// Helper: Send Email notification to admin
+const sendEmailNotification = async (order) => {
+  const emailUser = process.env.EMAIL_USER;
+  const emailPass = process.env.EMAIL_PASS;
+  const adminEmail = process.env.ADMIN_EMAIL || emailUser;
+
+  if (!emailUser || !emailPass) {
+    console.log('Email credentials not configured, skipping email notification');
+    return;
+  }
+
+  // Create transporter
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: emailUser,
+      pass: emailPass
+    }
+  });
+
+  // Generate Google Maps link
+  let mapsLink;
+  if (order.latitude && order.longitude) {
+    // Use coordinates for precise location
+    mapsLink = `https://www.google.com/maps?q=${order.latitude},${order.longitude}`;
+  } else {
+    // Fallback to address search
+    const encodedAddress = encodeURIComponent(`${order.address}, ${order.pincode}`);
+    mapsLink = `https://www.google.com/maps/search/${encodedAddress}`;
+  }
+
+  // Create items list
+  const itemsHtml = order.items
+    .map(item => `<li>${item.name} × ${item.quantity} (${item.unit}) - ₹${item.price * item.quantity}</li>`)
+    .join('');
+
+  // Create email content
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #c41e3a; border-bottom: 2px solid #c41e3a; padding-bottom: 10px;">🛒 New Order Received!</h2>
+      
+      <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <h3 style="margin-top: 0; color: #333;">Customer Details</h3>
+        <p><strong>👤 Name:</strong> ${order.customer_name}</p>
+        <p><strong>📞 Phone:</strong> <a href="tel:${order.phone}">${order.phone}</a></p>
+        <p><strong>📍 Address:</strong> ${order.address}</p>
+        <p><strong>📮 Pincode:</strong> ${order.pincode}</p>
+        ${order.latitude && order.longitude ? `<p><strong>📌 Coordinates:</strong> ${order.latitude}, ${order.longitude}</p>` : ''}
+      </div>
+
+      <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <h3 style="margin-top: 0; color: #333;">📍 Navigate to Customer Location</h3>
+        <a href="${mapsLink}" style="display: inline-block; background: #4285f4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+          🗺️ Open in Google Maps
+        </a>
+        <p style="font-size: 12px; color: #666; margin-top: 10px;">
+          ${order.latitude && order.longitude ? 'Exact location captured from customer\'s device' : 'Location based on address (customer did not share exact location)'}
+        </p>
+      </div>
+
+      <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <h3 style="margin-top: 0; color: #333;">📦 Order Items</h3>
+        <ul style="padding-left: 20px;">
+          ${itemsHtml}
+        </ul>
+      </div>
+
+      <div style="background: #c41e3a; color: white; padding: 15px; border-radius: 8px; margin: 15px 0; text-align: center;">
+        <h2 style="margin: 0;">💰 Total: ₹${order.total}</h2>
+        <p style="margin: 5px 0;">💳 Payment: ${order.payment_mode}</p>
+      </div>
+
+      <div style="text-align: center; padding: 10px; color: #666; font-size: 12px;">
+        <p>Order ID: ${order.id}</p>
+        <p>Order Time: ${new Date(order.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</p>
+      </div>
+    </div>
+  `;
+
+  const textContent = `
+NEW ORDER RECEIVED!
+
+Customer: ${order.customer_name}
+Phone: ${order.phone}
+Address: ${order.address}
+Pincode: ${order.pincode}
+${order.latitude && order.longitude ? `Coordinates: ${order.latitude}, ${order.longitude}` : ''}
+
+Google Maps: ${mapsLink}
+
+Items:
+${order.items.map(item => `- ${item.name} × ${item.quantity} (${item.unit}) - ₹${item.price * item.quantity}`).join('\n')}
+
+Total: ₹${order.total}
+Payment: ${order.payment_mode}
+
+Order ID: ${order.id}
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: `"Fresh Meat Hub" <${emailUser}>`,
+      to: adminEmail,
+      subject: `🛒 New Order from ${order.customer_name} - ₹${order.total}`,
+      text: textContent,
+      html: htmlContent
+    });
+    console.log(`Email notification sent for order ${order.id}`);
+  } catch (error) {
+    console.error('Failed to send email notification:', error.message);
+  }
+};
+
 // Helper: Log order to file
 const logOrderToFile = async (order) => {
   const logsDir = path.join(__dirname, '..', 'logs');
