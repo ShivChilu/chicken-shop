@@ -192,29 +192,67 @@ class APITester:
         else:
             self.log_test("Orders - GET all", False, f"Status: {status}, Response: {data}")
         
-        # POST create order
-        test_order = {
-            'customer_name': 'Rajesh Kumar',
-            'phone': '+919876543210',
-            'address': '123 MG Road, Bangalore',
+        # POST create order WITH location data
+        test_order_with_location = {
+            'customer_name': 'Arjun Patel',
+            'phone': '9876543210',
+            'address': '123 Test Street, Test City',
             'pincode': '500001',
             'items': [
                 {
-                    'product_id': 'test-product-id',
-                    'name': 'Chicken Breast',
-                    'price': 280,
+                    'product_id': 'test-123',
+                    'name': 'Test Product',
+                    'price': 100,
                     'quantity': 2,
                     'unit': '500g'
                 }
             ],
-            'total': 560
+            'total': 200,
+            'latitude': 17.385044,
+            'longitude': 78.486671
         }
-        success, data, status = self.make_request('POST', '/orders', test_order)
+        success, data, status = self.make_request('POST', '/orders', test_order_with_location)
         
         if success and isinstance(data, dict) and 'id' in data:
             order_id = data['id']
             self.created_ids['orders'].append(order_id)
-            self.log_test("Orders - POST create", True, f"Status: {status}, ID: {order_id}")
+            
+            # Verify location data is stored
+            if 'latitude' in data and 'longitude' in data and data['latitude'] == 17.385044 and data['longitude'] == 78.486671:
+                self.log_test("Orders - POST create with location", True, f"Status: {status}, ID: {order_id}, Location: ({data['latitude']}, {data['longitude']})")
+            else:
+                self.log_test("Orders - POST create with location", False, f"Status: {status}, Location data missing or incorrect: {data}")
+        else:
+            self.log_test("Orders - POST create with location", False, f"Status: {status}, Response: {data}")
+        
+        # POST create order WITHOUT location data (fallback test)
+        test_order_no_location = {
+            'customer_name': 'Priya Sharma',
+            'phone': '9876543211',
+            'address': '456 Another Street, Another City',
+            'pincode': '500002',
+            'items': [
+                {
+                    'product_id': 'test-456',
+                    'name': 'Another Test Product',
+                    'price': 150,
+                    'quantity': 1,
+                    'unit': '1kg'
+                }
+            ],
+            'total': 150
+        }
+        success, data, status = self.make_request('POST', '/orders', test_order_no_location)
+        
+        if success and isinstance(data, dict) and 'id' in data:
+            order_id = data['id']
+            self.created_ids['orders'].append(order_id)
+            
+            # Verify order is created without location (should have null values)
+            if 'latitude' in data and 'longitude' in data and data['latitude'] is None and data['longitude'] is None:
+                self.log_test("Orders - POST create without location", True, f"Status: {status}, ID: {order_id}, Location: null (fallback working)")
+            else:
+                self.log_test("Orders - POST create without location", False, f"Status: {status}, Location fallback issue: {data}")
             
             # PUT update order status
             status_update = {'status': 'confirmed'}
@@ -225,7 +263,7 @@ class APITester:
             else:
                 self.log_test("Orders - PUT status update", False, f"Status: {status}, Response: {data}")
         else:
-            self.log_test("Orders - POST create", False, f"Status: {status}, Response: {data}")
+            self.log_test("Orders - POST create without location", False, f"Status: {status}, Response: {data}")
     
     def test_pincodes_crud(self):
         """Test Pincodes CRUD operations"""
