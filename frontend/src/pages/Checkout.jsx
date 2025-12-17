@@ -44,6 +44,70 @@ const Checkout = () => {
     }
   }, [items, navigate]);
 
+  // Request geolocation on component mount
+  useEffect(() => {
+    requestLocation();
+  }, []);
+
+  const requestLocation = () => {
+    if (!navigator.geolocation) {
+      setLocation(prev => ({
+        ...prev,
+        status: 'unavailable',
+        error: 'Geolocation is not supported by your browser'
+      }));
+      return;
+    }
+
+    setLocation(prev => ({ ...prev, status: 'loading' }));
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          status: 'granted',
+          error: null
+        });
+        toast.success('Location captured for faster delivery!');
+      },
+      (error) => {
+        let errorMessage = 'Unable to get location';
+        let status = 'denied';
+        
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'Location permission denied';
+            status = 'denied';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Location information unavailable';
+            status = 'unavailable';
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'Location request timed out';
+            status = 'unavailable';
+            break;
+          default:
+            errorMessage = 'An unknown error occurred';
+            status = 'unavailable';
+        }
+        
+        setLocation({
+          latitude: null,
+          longitude: null,
+          status,
+          error: errorMessage
+        });
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000 // 5 minutes cache
+      }
+    );
+  };
+
   const validatePincode = async (code) => {
     if (code.length !== 6) {
       setPincodeValid(null);
