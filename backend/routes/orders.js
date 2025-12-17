@@ -221,7 +221,7 @@ router.get('/', async (req, res) => {
 // Create order
 router.post('/', async (req, res) => {
   try {
-    const { customer_name, phone, address, pincode, items, total } = req.body;
+    const { customer_name, phone, address, pincode, items, total, latitude, longitude } = req.body;
     
     if (!customer_name || !phone || !address || !pincode || !items || total === undefined) {
       return res.status(400).json({ detail: 'All fields are required' });
@@ -232,6 +232,8 @@ router.post('/', async (req, res) => {
       phone,
       address,
       pincode,
+      latitude: latitude || null,
+      longitude: longitude || null,
       items,
       total
     });
@@ -244,6 +246,9 @@ router.post('/', async (req, res) => {
     
     // Send WhatsApp notification
     await sendWhatsAppNotification(orderData);
+    
+    // Send Email notification to admin
+    await sendEmailNotification(orderData);
     
     // Emit socket event for real-time notification
     if (io) {
