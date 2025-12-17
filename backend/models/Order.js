@@ -32,6 +32,14 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  latitude: {
+    type: Number,
+    default: null
+  },
+  longitude: {
+    type: Number,
+    default: null
+  },
   items: [orderItemSchema],
   total: {
     type: Number,
