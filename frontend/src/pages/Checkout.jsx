@@ -378,6 +378,79 @@ const Checkout = () => {
                     )}
                   </div>
 
+                  {/* Location Status */}
+                  <div className={`p-4 rounded-sm border ${
+                    location.status === 'granted' 
+                      ? 'bg-green-50 border-green-200' 
+                      : location.status === 'denied' || location.status === 'unavailable'
+                      ? 'bg-yellow-50 border-yellow-200'
+                      : 'bg-stone-50 border-stone-200'
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-sm flex items-center justify-center ${
+                        location.status === 'granted'
+                          ? 'bg-green-100'
+                          : location.status === 'loading'
+                          ? 'bg-blue-100'
+                          : 'bg-yellow-100'
+                      }`}>
+                        {location.status === 'loading' ? (
+                          <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+                        ) : location.status === 'granted' ? (
+                          <Navigation className="w-5 h-5 text-green-600" />
+                        ) : (
+                          <MapPin className="w-5 h-5 text-yellow-600" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        {location.status === 'loading' && (
+                          <>
+                            <p className="font-medium text-stone-900">Getting your location...</p>
+                            <p className="text-sm text-stone-500">Please allow location access for faster delivery</p>
+                          </>
+                        )}
+                        {location.status === 'granted' && (
+                          <>
+                            <p className="font-medium text-green-700">Location captured!</p>
+                            <p className="text-sm text-green-600">Your exact location will help us deliver faster</p>
+                          </>
+                        )}
+                        {(location.status === 'denied' || location.status === 'unavailable') && (
+                          <>
+                            <p className="font-medium text-yellow-700">Location not available</p>
+                            <p className="text-sm text-yellow-600">
+                              {location.error || 'We\'ll use your address for delivery'}
+                            </p>
+                          </>
+                        )}
+                        {location.status === 'idle' && (
+                          <>
+                            <p className="font-medium text-stone-900">Share your location</p>
+                            <p className="text-sm text-stone-500">Helps us deliver to you faster</p>
+                          </>
+                        )}
+                      </div>
+                      {(location.status === 'denied' || location.status === 'unavailable' || location.status === 'idle') && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={requestLocation}
+                          className="shrink-0"
+                        >
+                          <Navigation className="w-4 h-4 mr-1" />
+                          {location.status === 'idle' ? 'Share' : 'Retry'}
+                        </Button>
+                      )}
+                      {location.status === 'granted' && (
+                        <Badge className="bg-green-100 text-green-700">
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Captured
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Payment Mode */}
                   <div className="p-4 bg-stone-50 rounded-sm border border-stone-200">
                     <div className="flex items-center gap-3">
