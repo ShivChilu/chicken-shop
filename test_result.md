@@ -102,6 +102,64 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
+user_problem_statement: "Add customer location capture at checkout and send email notification to admin with address and Google Maps link for navigation. Use Browser Geolocation API (free) and Nodemailer with Gmail."
+
+backend:
+  - task: "Email notification to admin on order"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/routes/orders.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented email notification using Nodemailer. Email includes customer details, address, order items, and Google Maps link for navigation."
+
+  - task: "Order model with latitude/longitude"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/models/Order.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added latitude and longitude fields to Order schema"
+
+frontend:
+  - task: "Geolocation capture at checkout"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Checkout.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented browser geolocation API capture with UI feedback for location status"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Email notification to admin on order"
+    - "Order model with latitude/longitude"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Implemented customer location capture feature with email notification. Backend: Added Nodemailer email sending when order is created with Google Maps link. Frontend: Added browser geolocation capture at checkout. Testing agent should test the order creation API endpoint with latitude/longitude fields and verify email is sent."
+
 user_problem_statement: "Rebuild the Fresh Meat Hub project using Node.js + Express instead of Python + FastAPI, use npm packages instead of pip packages, use JavaScript/ES6 instead of Python, Mongoose ODM instead of Motor (async MongoDB). Keep all endpoints identical and include WhatsApp notifications."
 
 backend:
