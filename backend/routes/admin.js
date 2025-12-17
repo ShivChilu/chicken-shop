@@ -8,10 +8,12 @@ router.post('/verify', async (req, res) => {
     const { pin } = req.body;
     const adminPin = process.env.ADMIN_PIN || '4242';
     
-    if (pin === adminPin) {
+    // Convert both to strings for comparison to handle type mismatches
+    if (String(pin) === String(adminPin)) {
       return res.json({ success: true, message: 'PIN verified' });
     }
     
+    console.log('PIN verification failed - received:', pin, 'expected:', adminPin);
     res.status(401).json({ detail: 'Invalid PIN' });
   } catch (error) {
     console.error('Error verifying admin:', error);
