@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ShoppingBag, MapPin, Phone, User, CheckCircle, AlertCircle, Truck } from 'lucide-react';
+import { ShoppingBag, MapPin, Phone, User, CheckCircle, AlertCircle, Truck, Navigation, Loader2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -20,6 +20,14 @@ const Checkout = () => {
   const [pincodeValid, setPincodeValid] = useState(null);
   const [pincodeChecking, setPincodeChecking] = useState(false);
   const pincodeTimeoutRef = useRef(null);
+
+  // Location state
+  const [location, setLocation] = useState({
+    latitude: null,
+    longitude: null,
+    status: 'idle', // idle, loading, granted, denied, unavailable
+    error: null
+  });
 
   const [formData, setFormData] = useState({
     customer_name: '',
