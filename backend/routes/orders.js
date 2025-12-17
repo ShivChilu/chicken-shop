@@ -3,6 +3,7 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import nodemailer from 'nodemailer';
 import { Order } from '../models/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
