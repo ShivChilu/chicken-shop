@@ -204,7 +204,10 @@ const Checkout = () => {
           quantity: item.quantity,
           unit: item.unit
         })),
-        total
+        total,
+        // Include location if available
+        latitude: location.latitude,
+        longitude: location.longitude
       };
 
       await axios.post(`${API}/orders`, orderData);
