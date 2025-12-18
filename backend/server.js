@@ -21,7 +21,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load environment variables
-dotenv.config({ path: path.join(__dirname, '.env') });
+// Only load .env file if environment variables aren't already set (e.g., by Render)
+dotenv.config({ path: path.join(__dirname, '.env'), override: false });
 
 // Create Express app
 const app = express();
