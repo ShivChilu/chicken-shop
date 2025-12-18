@@ -164,6 +164,90 @@ Order ID: ${order.id}
 
   try {
     await transporter.sendMail({
+
+// Email health check (no email is sent). Useful to confirm configuration quickly.
+// GET /api/orders/email/health
+router.get('/email/health', async (req, res) => {
+  const emailUser = process.env.EMAIL_USER;
+  const emailPassRaw = process.env.EMAIL_PASS;
+  const emailPass = emailPassRaw ? emailPassRaw.replace(/\s+/g, '') : undefined;
+  const adminEmail = process.env.ADMIN_EMAIL || emailUser;
+
+  if (!emailUser || !emailPass) {
+    return res.status(400).json({
+      ok: false,
+      error: 'EMAIL_USER/EMAIL_PASS not configured',
+      configured: {
+        email_user_set: !!emailUser,
+        email_pass_set: !!emailPassRaw,
+        admin_email_set: !!process.env.ADMIN_EMAIL
+      }
+    });
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: emailUser, pass: emailPass },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 20000
+    });
+
+    const ok = await transporter.verify();
+    return res.json({
+      ok,
+      configured: {
+        email_user_set: true,
+        email_pass_set: true,
+        admin_email: adminEmail
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      error: error.message
+    });
+  }
+});
+
+// Send a test email to admin (useful for Render / production debugging)
+// POST /api/orders/email/test
+router.post('/email/test', async (req, res) => {
+  const emailUser = process.env.EMAIL_USER;
+  const emailPassRaw = process.env.EMAIL_PASS;
+  const emailPass = emailPassRaw ? emailPassRaw.replace(/\s+/g, '') : undefined;
+  const adminEmail = process.env.ADMIN_EMAIL || emailUser;
+
+  if (!emailUser || !emailPass) {
+    return res.status(400).json({
+      ok: false,
+      error: 'EMAIL_USER/EMAIL_PASS not configured'
+    });
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: emailUser, pass: emailPass },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 20000
+    });
+
+    const info = await transporter.sendMail({
+      from: `"Fresh Meat Hub" <${emailUser}>`,
+      to: adminEmail,
+      subject: 'Test Email: Fresh Meat Hub',
+      text: `This is a test email sent at ${new Date().toISOString()}.`
+    });
+
+    return res.json({ ok: true, message_id: info.messageId, response: info.response });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
       from: `"Fresh Meat Hub" <${emailUser}>`,
       to: adminEmail,
       subject: `🛒 New Order from ${order.customer_name} - ₹${order.total}`,
