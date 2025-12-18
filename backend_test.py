@@ -10,7 +10,7 @@ import sys
 from typing import Dict, Any, List
 
 # Use the production URL from frontend/.env
-BASE_URL = "https://sprint-app-7.preview.emergentagent.com/api"
+BASE_URL = "https://chicken-order-debug.preview.emergentagent.com/api"
 
 class APITester:
     def __init__(self):
