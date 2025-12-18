@@ -86,6 +86,20 @@ app.get('/api', (req, res) => {
   res.json({ message: 'Fresh Meat Hub API' });
 });
 
+// Health check endpoint for connection testing
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: {
+      admin_pin_set: !!process.env.ADMIN_PIN,
+      mongo_url_set: !!process.env.MONGO_URL,
+      db_name: process.env.DB_NAME || 'not set',
+      cors_origins: process.env.CORS_ORIGINS || 'not set'
+    }
+  });
+});
+
 app.use('/api/admin', adminRouter);
 app.use('/api/categories', categoriesRouter);
 app.use('/api/products', productsRouter);
