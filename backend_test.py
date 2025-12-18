@@ -418,10 +418,28 @@ class APITester:
         self.test_init_data()
         print()
         
-        # Test all endpoints
+        # Test core endpoints
         self.test_root_api()
         print()
         
+        # Test health endpoint
+        self.test_health_endpoint()
+        print()
+        
+        # Test email endpoints (focus of this review)
+        print("🔍 TESTING EMAIL + ORDER FLOW (Review Focus)")
+        print("-" * 40)
+        self.test_email_health_endpoint()
+        print()
+        
+        self.test_email_test_endpoint()
+        print()
+        
+        self.test_order_creation_with_email()
+        print()
+        print("-" * 40)
+        
+        # Test other endpoints
         self.test_admin_auth()
         print()
         
