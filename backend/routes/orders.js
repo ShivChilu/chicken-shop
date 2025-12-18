@@ -55,12 +55,19 @@ Order ID: ${order.id}`;
 // Helper: Send Email notification to admin
 const sendEmailNotification = async (order) => {
   const emailUser = process.env.EMAIL_USER;
-  const emailPass = process.env.EMAIL_PASS;
+  const emailPassRaw = process.env.EMAIL_PASS;
+  // Gmail app passwords are 16 chars and often copied with spaces for readability.
+  // Normalize by removing whitespace to avoid auth failures.
+  const emailPass = emailPassRaw ? emailPassRaw.replace(/\s+/g, '') : undefined;
   const adminEmail = process.env.ADMIN_EMAIL || emailUser;
 
   if (!emailUser || !emailPass) {
     console.log('Email credentials not configured, skipping email notification');
     return;
+  }
+
+  if (emailPassRaw && emailPassRaw !== emailPass) {
+    console.warn('EMAIL_PASS contains whitespace; using normalized value without spaces.');
   }
 
   // Create transporter
@@ -69,7 +76,11 @@ const sendEmailNotification = async (order) => {
     auth: {
       user: emailUser,
       pass: emailPass
-    }
+    },
+    // Prevent long hangs on SMTP connect in production deployments
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 20000
   });
 
   // Generate Google Maps link
