@@ -21,8 +21,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load environment variables
-// Only load .env file if environment variables aren't already set (e.g., by Render)
-dotenv.config({ path: path.join(__dirname, '.env'), override: false });
+// dotenv won't override existing env vars (like those set by Render)
+dotenv.config({ path: path.join(__dirname, '.env') });
+
+// Log environment configuration at startup
+console.log('=== Environment Configuration ===');
+console.log('ADMIN_PIN configured:', !!process.env.ADMIN_PIN);
+console.log('MONGO_URL configured:', !!process.env.MONGO_URL);
+console.log('DB_NAME:', process.env.DB_NAME || 'not set');
+console.log('================================');
 
 // Create Express app
 const app = express();
