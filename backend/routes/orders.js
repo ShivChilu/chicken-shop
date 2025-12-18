@@ -164,6 +164,17 @@ Order ID: ${order.id}
 
   try {
     await transporter.sendMail({
+      from: `"Fresh Meat Hub" <${emailUser}>`,
+      to: adminEmail,
+      subject: `🛒 New Order from ${order.customer_name} - ₹${order.total}`,
+      text: textContent,
+      html: htmlContent
+    });
+    console.log(`Email notification sent for order ${order.id}`);
+  } catch (error) {
+    console.error('Failed to send email notification:', error.message);
+  }
+};
 
 // Email health check (no email is sent). Useful to confirm configuration quickly.
 // GET /api/orders/email/health
@@ -247,18 +258,6 @@ router.post('/email/test', async (req, res) => {
     return res.status(500).json({ ok: false, error: error.message });
   }
 });
-
-      from: `"Fresh Meat Hub" <${emailUser}>`,
-      to: adminEmail,
-      subject: `🛒 New Order from ${order.customer_name} - ₹${order.total}`,
-      text: textContent,
-      html: htmlContent
-    });
-    console.log(`Email notification sent for order ${order.id}`);
-  } catch (error) {
-    console.error('Failed to send email notification:', error.message);
-  }
-};
 
 // Helper: Log order to file
 const logOrderToFile = async (order) => {
