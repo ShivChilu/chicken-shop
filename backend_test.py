@@ -311,6 +311,85 @@ class APITester:
         else:
             self.log_test("Pincodes - Verify invalid", False, f"Status: {status}, Response: {data}")
     
+    def test_health_endpoint(self):
+        """Test GET /api/health - Health check endpoint"""
+        success, data, status = self.make_request('GET', '/health')
+        
+        if success and isinstance(data, dict) and data.get('status') == 'ok':
+            self.log_test("Health endpoint", True, f"Status: {status}, Response: {data}")
+        else:
+            self.log_test("Health endpoint", False, f"Status: {status}, Response: {data}")
+    
+    def test_email_health_endpoint(self):
+        """Test GET /api/orders/email/health - Email configuration health check"""
+        success, data, status = self.make_request('GET', '/orders/email/health')
+        
+        if success and isinstance(data, dict) and data.get('ok') is True:
+            self.log_test("Email health check", True, f"Status: {status}, SMTP config OK")
+        else:
+            self.log_test("Email health check", False, f"Status: {status}, Response: {data}")
+    
+    def test_email_test_endpoint(self):
+        """Test POST /api/orders/email/test - Send test email"""
+        success, data, status = self.make_request('POST', '/orders/email/test')
+        
+        if success and isinstance(data, dict) and data.get('ok') is True:
+            self.log_test("Email test send", True, f"Status: {status}, Test email sent successfully")
+        else:
+            self.log_test("Email test send", False, f"Status: {status}, Response: {data}")
+    
+    def test_order_creation_with_email(self):
+        """Test POST /api/orders - Order creation with email notification (timing test)"""
+        import time
+        
+        # Test order with realistic data
+        test_order = {
+            'customer_name': 'Rajesh Kumar',
+            'phone': '9876543210',
+            'address': '123 MG Road, Bangalore',
+            'pincode': '560001',
+            'items': [
+                {
+                    'product_id': 'chicken-breast-001',
+                    'name': 'Chicken Breast',
+                    'price': 250,
+                    'quantity': 2,
+                    'unit': '500g'
+                },
+                {
+                    'product_id': 'mutton-curry-002',
+                    'name': 'Mutton Curry Cut',
+                    'price': 450,
+                    'quantity': 1,
+                    'unit': '1kg'
+                }
+            ],
+            'total': 950,
+            'latitude': 12.9716,
+            'longitude': 77.5946
+        }
+        
+        # Measure response time
+        start_time = time.time()
+        success, data, status = self.make_request('POST', '/orders', test_order)
+        end_time = time.time()
+        response_time = end_time - start_time
+        
+        if success and isinstance(data, dict) and 'id' in data and status == 201:
+            order_id = data['id']
+            self.created_ids['orders'].append(order_id)
+            
+            # Check if response was quick (under 20 seconds as requested)
+            if response_time <= 20:
+                self.log_test("Order creation with email", True, 
+                            f"Status: {status}, ID: {order_id}, Response time: {response_time:.2f}s")
+            else:
+                self.log_test("Order creation with email", False, 
+                            f"Status: {status}, ID: {order_id}, Response time: {response_time:.2f}s (>20s - too slow)")
+        else:
+            self.log_test("Order creation with email", False, 
+                        f"Status: {status}, Response time: {response_time:.2f}s, Response: {data}")
+    
     def cleanup(self):
         """Clean up any created test data"""
         print("\n🧹 Cleaning up test data...")
