@@ -2,6 +2,17 @@ import express from 'express';
 
 const router = express.Router();
 
+// Debug endpoint to check environment (remove in production)
+router.get('/debug-env', (req, res) => {
+  const adminPinSet = !!process.env.ADMIN_PIN;
+  const adminPinLength = process.env.ADMIN_PIN ? process.env.ADMIN_PIN.length : 0;
+  res.json({
+    admin_pin_configured: adminPinSet,
+    admin_pin_length: adminPinLength,
+    node_env: process.env.NODE_ENV || 'not set'
+  });
+});
+
 // Verify admin PIN
 router.post('/verify', async (req, res) => {
   try {
