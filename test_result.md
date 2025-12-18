@@ -107,11 +107,11 @@ user_problem_statement: "Add customer location capture at checkout and send emai
 backend:
   - task: "Email notification to admin on order"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/routes/orders.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
@@ -119,7 +119,12 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ TESTED: Email notifications working correctly. Both orders (with and without location) triggered successful email notifications to chiluverushivaprasad02@gmail.com. Logs confirm 'Email notification sent for order [ID]' for both test cases. Email includes Google Maps links - precise coordinates when available, address fallback when not."
-
+      - working: false
+        agent: "user"
+        comment: "User reports: on deployed app, Place Order loads for long time, order eventually placed but admin email not received. Suspected SMTP/auth/config issue in production."
+      - working: "NA"
+        agent: "main"
+        comment: "Added EMAIL_PASS whitespace normalization + SMTP timeouts, and added debug endpoints: GET /api/orders/email/health and POST /api/orders/email/test to verify email setup in production. Needs retesting."
   - task: "Order model with latitude/longitude"
     implemented: true
     working: true
